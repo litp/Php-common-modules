@@ -2,4 +2,4 @@
 
 require('autoloader.php');
 
-
+Router::dispatch();
