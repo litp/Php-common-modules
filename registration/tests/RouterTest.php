@@ -30,4 +30,19 @@ class RouterTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	public function testDispatch()
+	{
+		//Router::Dispatch('/register');
+
+		//Router::Dispatch('/register/p1/p2');
+
+		//Router::Dispatch('/register/p1/p2/');
+
+		Router::Dispatch('/Registration/p1');
+
+		Router::Dispatch('/Exceptions/Test/p1/p2');
+
+		$this->assertTrue(true);
+	}
+
 }

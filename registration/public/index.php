@@ -2,4 +2,8 @@
 
 require('autoloader.php');
 
-Router::dispatch();
+$request = new Request();
+
+$router = new Router();
+
+$router->dispatch($request);

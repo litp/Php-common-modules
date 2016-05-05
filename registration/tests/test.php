@@ -2,6 +2,6 @@
 
 $testString ='/test';
 
-$result = str_replace('/test','', $testString);
+$result = rtrim('/test/','/');
 
 var_dump($result);

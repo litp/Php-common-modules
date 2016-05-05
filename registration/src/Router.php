@@ -2,16 +2,17 @@
 
 class Router
 {
-    protected static $directRouterTable = [
+    protected $directRouterTable = [
     // 'url' => function
-    '/register' => ['Registration', 'register']
+    '/\/register/' => ['Registration', 'register']
     ];
 
-    public static $rootDirectory = __DIR__;
-    public static $controllerInstance;
+    protected $rootDirectory = __DIR__;
+    protected $controllerInstance;
+
 
     // return query path starting with '/' and without the last '/'
-    public static function getQueryPath()
+    public function getQueryPath()
     {
         if (isset($_SERVER['REQUEST_URI']) && isset($_SERVER['SCRIPT_NAME'])) {
             $queryPath = str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['REQUEST_URI']);
@@ -23,51 +24,58 @@ class Router
         return '/';
     }
 
-    public static function dispatch()
+
+    public function dispatch($queryPath = null)
     {
-        $queryPath = self::getQueryPath();
+        if (is_null($queryPath)) {
+            $queryPath = $this->getQueryPath();
+        }
 
         // first check if query path matches direct router table
-        foreach  (self::$directRouterTable as $uri => $function) {
+        foreach ($this->$directRouterTable as $uri => $function) {
             if (preg_match($uri, $queryPath, $matches)) {
-                $parameterPath = str_replace($matches[0],'',$uri);
+                $parameterPath = str_replace($matches[0],'',$queryPath);
                 if ($parameterPath == '') {
                     $parameters = null;
                 } else {
-                    $parameters = explode('/',$parameterPath);
+                    $parameters = explode('/',rtrim($parameterPath, '/'));
+                    array_shift($parameters);
                 }
 
-                call_user_func($function,$parameters);
-
-                return true;
+                //var_dump($function);
+                //var_dump($parameters);
+                return call_user_func($function,$parameters);
             }
         }
 
 
         // try to load the class
+        $queryPath = rtrim($queryPath, '/');
         $queryPathParts = explode('/', $queryPath);
-        $classPath = self::$rootDirectory;
+        $classPath = $this->rootDirectory;
 
         // remove the first empty element
         array_shift($queryPathParts);
 
         foreach ($queryPathParts as $key => $queryPart) {
-            if (file_exists($classPath . '/' . $queryPath)) {
+            if (file_exists($classPath . '/' . $queryPart) && 
+                is_dir($classPath . '/' . $queryPart)) {
 
-                if (is_dir($classPath . '/' . $queryPath)) {
-                    $classPath = $classPath . '/' . $queryPath;
-                } elseif (is_file($classPath . '/' . $queryPath)) {
-                    //load the class in the file and call the function
-                    require($classPath . '/' . $queryPath . '.php');
-                    self::$controllerInstance = new $queryPath;
+                    $classPath = $classPath . '/' . $queryPart;
+                    var_dump($classPath);
 
-                    call_user_func(array(self::$controllerInstance, $queryPart), array_slice($queryPathParts, $key+1));
+            } elseif (file_exists($classPath . '/' . $queryPart . '.php') && 
+                is_file($classPath . '/' . $queryPart . '.php')) {
 
-                    return true;
-                }
+                //load the class in the file and call the function
+                require_once($classPath . '/' . $queryPart . '.php');
+                $this->controllerInstance = new $queryPart;
 
+                //var_dump(array($this->controllerInstance, $queryPart));
+                //var_dump(array_slice($queryPathParts, $key+1));
+                return call_user_func(array($this->controllerInstance, $queryPart), array_slice($queryPathParts, $key+1));               
             } else {
-                // throw Exception
+                // throw Bad Request Exception
             }
         }
     }
