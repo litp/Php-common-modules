@@ -52,24 +52,34 @@ class Request
         $this->setQueryPath();
         $this->setScriptName();
         $this->setMethod();
-        $this->setEncoding();
     }
-
-
 
     public function getHost()
     {
-        return $this->META['HTTP_HOST'];
+    	if (isset($this->META['HTTP_HOST'])) {
+	        return $this->META['HTTP_HOST'];
+	    } else {
+	    	return false;
+	    }
     }
 
     public function getPort()
     {
-        return $this->META['SERVER_PORT'];
+    	if (isset($this->META['SERVER_PORT'])) {
+	        return $this->META['SERVER_PORT'];
+	    } else {
+	    	return '80';
+	    }
     }
 
     public function getQueryPath()
     {
-        return $this->META['REQUEST_URI'];
+    	if (isset($this->META['REQUEST_URI'])) {
+    		return $this->META['REQUEST_URI'];
+    	} else {
+    		return '/';
+    	}
+        
     }
 
     public function buildAbsoluteUri()
@@ -87,12 +97,14 @@ class Request
         //
     }
 
-    public function setScheme($scheme = 'http')
+    public function setScheme($scheme = null)
     {
-        if (isset($this->META['REQUEST_SCHEME'])) {
+        if (isset($scheme)) {
+            $this->scheme = $scheme;
+        } elseif (isset($this->META['REQUEST_SCHEME'])) {
             $this->scheme = $this->META['REQUEST_SCHEME'];
         } else {
-            $this->scheme = $scheme;
+        	$this->scheme = 'http';
         }
     }
 
@@ -111,24 +123,23 @@ class Request
     {
         if (isset($method)) {
             $this->method = $method;
-        } else {
+        } elseif (isset($this->META['REQUEST_METHOD'])) {
             $this->method = $this->META['REQUEST_METHOD'];
+        } else {
+        	$this->method = 'GET';
         }
 
         return $this->method;
-    }
-
-    public function setEncoding()
-    {
-        //
     }
 
     public function setScriptName($scriptName = null)
     {
     	if (isset($scriptName)) {
     		$this->scriptName = $scriptName;
-    	} else {
+    	} elseif (isset($this->META['SCRIPT_NAME'])) {
     		$this->scriptName = $this->META['SCRIPT_NAME'];
+    	} else {
+    		$this->scriptName = '';
     	}
 
     	return $this->scriptName;
