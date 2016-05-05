@@ -2,8 +2,10 @@
 
 require('autoloader.php');
 
-$request = new Request();
+$request = Request::constructFromEnvironment();
 
 $router = new Router();
 
-$router->dispatch($request);
+$response = $router->dispatch($request);
+
+//$response->send();
