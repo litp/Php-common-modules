@@ -1,0 +1,7 @@
+{
+    "directory":[
+        "Aurora/framework/src",
+        "Aurora/framework/src/Http",
+        "registration/src"
+        ]
+}
